@@ -72,7 +72,7 @@
                                             <div class="col-md-6">
                                                 <div id="preview-container" class="preview-container">
                                                     <canvas id="canvas" width="320" height="240" class="d-none"></canvas>
-                                                    <img id="preview" src="/visitor_management/static/src/img/user-placeholder.png" width="320" height="240"/>
+                                                    <img id="preview" src="/visitor_tracking_system/static/src/img/user-placeholder.png" width="320" height="240"/>
                                                 </div>
                                                 <button type="button" id="retake-btn" class="btn btn-secondary mt-2 d-none">Retake Photo</button>
                                             </div>
@@ -159,7 +159,7 @@
                     retakeButton.addEventListener('click', async function() {
                         // Clear image data
                         imageDataInput.value = '';
-                        previewElement.src = '/visitor_management/static/src/img/user-placeholder.png';
+                        previewElement.src = '/visitor_tracking_system/static/src/img/user-placeholder.png';
 
                         // Hide retake button, show capture button
                         retakeButton.classList.add('d-none');

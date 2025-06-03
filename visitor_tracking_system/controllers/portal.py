@@ -10,7 +10,7 @@ class VisitorRegistrationController(http.Controller):
         values = {
             'contacts': contacts,
         }
-        return request.render("visitor_management.visitor_registration_form", values)
+        return request.render("visitor_tracking_system.visitor_registration_form", values)
     
     @http.route(['/visitor/registration/submit'], type='http', auth="public", website=True, methods=['POST'])
     def visitor_registration_submit(self, **post):
@@ -43,7 +43,7 @@ class VisitorRegistrationController(http.Controller):
         # Create the frontdesk.visitor record
         frontdesk_visitor.create(vals)
             
-        return request.render("visitor_management.visitor_registration_thanks")
+        return request.render("visitor_tracking_system.visitor_registration_thanks")
 
     # def _prepare_home_portal_values(self, counters):
     #     values = super()._prepare_home_portal_values(counters)
