@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Update Frontdesk Visitor Form to Include Image -->
+    <record id="frontdesk_visitor_form_inherit" model="ir.ui.view">
+        <field name="name">frontdesk.visitor.form.inherit</field>
+        <field name="model">frontdesk.visitor</field>
+        <field name="inherit_id" ref="frontdesk.frontdesk_visitor_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="before">
+                <field name="image" widget="image" class="oe_avatar"/>
+            </xpath>
+            <xpath expr="//field[@name='station_id']" position="attributes">
+                <attribute name="required">0</attribute>
+            </xpath>
+            <xpath expr="//field[@name='host_ids']" position="replace">
+                <field name="host_id"/>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- Update Frontdesk Visitor List View to Show Photo Indicator -->
+    <record id="frontdesk_visitor_tree_inherit" model="ir.ui.view">
+        <field name="name">frontdesk.visitor.tree.inherit</field>
+        <field name="model">frontdesk.visitor</field>
+        <field name="inherit_id" ref="frontdesk.frontdesk_visitor_view_tree"/>
+        <field name="arch" type="xml">
+            <!-- <xpath expr="//field[@name='name']" position="before">
+                <field name="image" widget="binary" options="{'no_open': True}" invisible="1"/>
+                <widget name="web_ribbon" title="Has Photo" bg_color="bg-success"/>
+            </xpath> -->
+            <xpath expr="//field[@name='host_ids']" position="replace">
+                <field name="host_id"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

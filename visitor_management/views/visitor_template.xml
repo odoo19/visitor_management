@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Keep your existing template as is -->
+    <!-- Visitor Registration Form Template -->
+    <template id="visitor_registration_form" name="Visitor Registration">
+        <t t-call="website.layout">
+            <div id="wrap" class="container mt32 mb32">
+                <div class="row">
+                    <div class="col-md-8 offset-md-2">
+                        <div class="card">
+                            <div class="card-header bg-primary">
+                                <h3 class="text-white">Visitor Registration</h3>
+                            </div>
+                            <div class="card-body">
+                                <form action="/visitor/registration/submit" method="post" enctype="multipart/form-data" class="visitor-form">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <input type="hidden" name="image_data" id="image_data"/>
+                                    
+                                    <div class="form-group mb-3">
+                                        <label for="name" class="form-label">Your Name</label>
+                                        <input type="text" name="name" id="name" class="form-control" required="required"/>
+                                    </div>
+                                    
+                                    <div class="form-group mb-3">
+                                        <label for="email" class="form-label">Email Address</label>
+                                        <input type="email" name="email" id="email" class="form-control"/>
+                                    </div>
+                                    
+                                    <div class="form-group mb-3">
+                                        <label for="phone" class="form-label">Phone Number</label>
+                                        <input type="tel" name="phone" id="phone" class="form-control"/>
+                                    </div>
+                                    
+                                    <div class="form-group mb-3">
+                                        <label for="purpose" class="form-label">Purpose of Visit</label>
+                                        <textarea name="purpose" id="purpose" class="form-control" rows="3" required="required"></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group mb-3">
+                                        <label for="contact_person_id" class="form-label">Person to Meet</label>
+                                        <select name="contact_person_id" id="contact_person_id" class="form-control" required="required">
+                                            <option value="">Select a Contact Person</option>
+                                            <t t-foreach="contacts" t-as="contact">
+                                                <option t-att-value="contact.id">
+                                                    <t t-esc="contact.name"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </div>
+
+                                    <!-- <div class="form-group mb-3">
+                                        <label for="station_id" class="form-label">Frontdesk Station</label>
+                                        <select name="station_id" id="station_id" class="form-control" required="required">
+                                            <option value="">Select a Station</option>
+                                            <t t-foreach="stations" t-as="station">
+                                                <option t-att-value="station.id">
+                                                    <t t-esc="station.name"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </div> -->
+                                    
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Take Photo</label>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div id="webcam-container" class="webcam-container">
+                                                    <video id="webcam" autoplay="autoplay" playsinline="playsinline" width="320" height="240"></video>
+                                                </div>
+                                                <button type="button" id="capture-btn" class="btn btn-primary mt-2">Capture Photo</button>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div id="preview-container" class="preview-container">
+                                                    <canvas id="canvas" width="320" height="240" class="d-none"></canvas>
+                                                    <img id="preview" src="/visitor_management/static/src/img/user-placeholder.png" width="320" height="240"/>
+                                                </div>
+                                                <button type="button" id="retake-btn" class="btn btn-secondary mt-2 d-none">Retake Photo</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group text-center mt-4">
+                                        <button type="submit" class="btn btn-primary btn-lg">Submit Registration</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Add JavaScript for the webcam functionality -->
+            <script type="text/javascript">
+                document.addEventListener('DOMContentLoaded', function() {
+                    const webcamElement = document.getElementById('webcam');
+                    const canvasElement = document.getElementById('canvas');
+                    const previewElement = document.getElementById('preview');
+                    const captureButton = document.getElementById('capture-btn');
+                    const retakeButton = document.getElementById('retake-btn');
+                    const imageDataInput = document.getElementById('image_data');
+
+                    let stream = null;
+
+                    async function startWebcam() {
+                        try {
+                            const constraints = {
+                                video: true,
+                                audio: false
+                            };
+                            stream = await navigator.mediaDevices.getUserMedia(constraints);
+                            webcamElement.srcObject = stream;
+                            webcamElement.style.display = 'block';
+                            previewElement.style.display = 'none';
+                        } catch (err) {
+                            console.error("Error accessing webcam:", err);
+                            alert("Could not access the webcam. Please ensure you have granted camera permissions.");
+                        }
+                    }
+
+                    function stopWebcam() {
+                        if (stream) {
+                            stream.getTracks().forEach(track => track.stop());
+                            stream = null;
+                        }
+                        webcamElement.style.display = 'none';
+                        previewElement.style.display = 'block';
+                    }
+
+                    // Initially hide webcam video
+                    webcamElement.style.display = 'none';
+
+                    captureButton.addEventListener('click', async function() {
+                        if (!stream) {
+                            // If webcam not started, start it
+                            await startWebcam();
+                            captureButton.textContent = "Take Snapshot";
+                        } else {
+                            // Capture photo
+                            const context = canvasElement.getContext('2d');
+                            canvasElement.width = webcamElement.videoWidth;
+                            canvasElement.height = webcamElement.videoHeight;
+                            context.drawImage(webcamElement, 0, 0, canvasElement.width, canvasElement.height);
+
+                            // Get data URL and show preview
+                            const dataUrl = canvasElement.toDataURL('image/png');
+                            previewElement.src = dataUrl;
+                            imageDataInput.value = dataUrl;
+
+                            // Stop webcam and hide video
+                            stopWebcam();
+
+                            // Show retake button, hide capture button
+                            retakeButton.classList.remove('d-none');
+                            captureButton.classList.add('d-none');
+                            captureButton.textContent = "Capture Photo"; // reset text for next time
+                        }
+                    });
+
+                    retakeButton.addEventListener('click', async function() {
+                        // Clear image data
+                        imageDataInput.value = '';
+                        previewElement.src = '/visitor_management/static/src/img/user-placeholder.png';
+
+                        // Hide retake button, show capture button
+                        retakeButton.classList.add('d-none');
+                        captureButton.classList.remove('d-none');
+
+                        // Restart webcam
+                        await startWebcam();
+                        captureButton.textContent = "Take Snapshot";
+                    });
+                });
+            </script>
+        </t>
+    </template>
+    
+    <!-- Thank You Page Template -->
+    <template id="visitor_registration_thanks" name="Registration Successful">
+        <t t-call="website.layout">
+            <div id="wrap" class="container mt32 mb32">
+                <div class="row">
+                    <div class="col-md-8 offset-md-2">
+                        <div class="card">
+                            <div class="card-header bg-success">
+                                <h3 class="text-white">Registration Successful</h3>
+                            </div>
+                            <div class="card-body text-center">
+                                <i class="fa fa-check-circle fa-5x text-success mb-3"></i>
+                                <h4>Thank you for registering as a visitor!</h4>
+                                <p>Your information has been submitted successfully.</p>
+                                <a href="/" class="btn btn-primary mt-3">Return to Home Page</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Template for the My Visits page -->
+    <!-- <template id="portal_my_visits" name="My Visits">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">My Visits</t>
+            </t>
+            
+            <t t-if="not visits">
+                <div class="alert alert-info">
+                    <p>There are currently no visits for your account.</p>
+                </div>
+            </t>
+            
+            <t t-if="visits">
+                <div class="o_portal_docs list-group">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr class="active">
+                                    <th>Date</th>
+                                    <th>Name</th>
+                                    <th>Purpose</th>
+                                    <th>Contact Person</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="visits" t-as="visit">
+                                    <tr>
+                                        <td><t t-esc="visit.create_date.strftime('%Y-%m-%d %H:%M')"/></td>
+                                        <td><t t-esc="visit.name"/></td>
+                                        <td><t t-esc="visit.purpose"/></td>
+                                        <td><t t-esc="visit.contact_person_id.name"/></td>
+                                        <td>
+                                            <span t-field="visit.state" t-options='{"widget": "badge", "badge_class": {"draft": "secondary", "confirmed": "info", "completed": "success", "cancelled": "danger"}}'/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div t-if="pager" class="o_portal_pager text-center">
+                    <t t-call="portal.pager"/>
+                </div>
+            </t>
+        </t>
+    </template>
+    
+    <template id="portal_my_home_visits" inherit_id="portal.portal_my_home" name="Portal My Home Visits">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-if="visit_count" t-call="portal.portal_docs_entry">
+                <t t-set="title">Visits</t>
+                <t t-set="url" t-value="'/my/visits'"/>
+                <t t-set="count" t-value="visit_count"/>
+            </t>
+        </xpath>
+    </template>
+    <template id="portal_my_home_menu_visits" inherit_id="portal.portal_my_home" name="Portal My Home Menu Visits">
+        <xpath expr="//div[@id='portal_content']" position="inside">
+            <div class="col-lg-4 mb-4">
+                <div class="card border-0">
+                    <a href="/my/visits" class="btn p-0">
+                        <div class="card-body">
+                            <div class="row align-items-center no-gutters">
+                                <div class="col-lg-3 text-center mr-4">
+                                    <span class="fa fa-id-card fa-3x text-primary"/>
+                                </div>
+                                <div class="col-lg-8">
+                                    <h5 class="mb-1">My Visits</h5>
+                                    <p class="text-muted">Follow your visitor registrations</p>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </xpath>
+    </template> -->
+    
+    <!-- Add Visitor Registration Link in Menu Before Contact Us -->
+    <record id="menu_visitor_registration" model="website.menu">
+        <field name="name">Visitor Registration</field>
+        <field name="url">/visitor/registration</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence">20</field> <!-- Adjust as needed based on your menu structure -->
+    </record>
+</odoo>

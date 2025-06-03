@@ -1,0 +1,5 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+access_visitor_registration_user,visitor.registration.user,model_visitor_registration,base.group_user,1,1,1,0
+access_visitor_registration_manager,visitor.registration.manager,model_visitor_registration,base.group_system,1,1,1,1
+access_visitor_registration_public,visitor.registration.public,model_visitor_registration,base.group_public,0,0,1,0
+
